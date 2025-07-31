@@ -2,7 +2,7 @@ import * as SecureStore from 'expo-secure-store';
 import instance from './api';
 import { getAccessToken, setAccessToken } from './utils/memory';
 
-export const login = async (email, password) => {
+export const login = async (email, password, getProtected) => {
 
   try {
     const res = await instance.post('/token/', { email, password });
@@ -13,16 +13,19 @@ export const login = async (email, password) => {
     setAccessToken(access);
     await SecureStore.setItemAsync('refresh', JSON.stringify(refresh));
     console.log('Login succesful');
+    if(getProtected) getProtected();
   } catch (error) {
     console.error('Login error:', error.response?.data || error.message);
     throw error;
   }
 };
 
-export const logout = async () => {
+export const logout = async (setUserData) => {
+
+  console.log('Logout succesful');
+  if(setUserData) setUserData({})
   await SecureStore.deleteItemAsync('refresh');
   setAccessToken(null);
-  console.log('Logout succesful');
 };
 
 export const register = async (data) => {

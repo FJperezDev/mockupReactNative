@@ -31,16 +31,10 @@ instance.interceptors.response.use(
       !originalRequest.url.includes('/token/refresh/') &&
       !originalRequest.url.includes('/token/')
     ) {
-      originalRequest._retry = true;
-
       try {
+        originalRequest._retry = true;
         const refreshRaw = await SecureStore.getItemAsync('refresh');
-        if (!refreshRaw) {
-          console.error('Error al refrescar access token: No refresh token guardado');
-          throw new Error('No refresh token');
-        }
         const refresh = JSON.parse(refreshRaw);
-
         // Obtener nuevo access token
         const res = await instance.post('/token/refresh/', { refresh });
         const newAccess = res.data.access;
@@ -52,7 +46,6 @@ instance.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${newAccess}`;
         return instance(originalRequest);
       } catch (refreshError) {
-        console.error('Error al refrescar token:', refreshError.response?.data || refreshError.message);
         // Logout automático si falla el refresh
         await SecureStore.deleteItemAsync('refresh');
         setAccessToken(null);

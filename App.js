@@ -6,6 +6,7 @@ import instance from './api';
 
 export default function App() {
   const [sessionRestored, setSessionRestored] = useState(false);
+  const [userData, setUserData] = useState({});
 
   useEffect(() => {
     const tryRestore = async () => {
@@ -17,10 +18,19 @@ export default function App() {
 
   if (!sessionRestored) return <Text>Restaurando sesión...</Text>;
 
-  const getProtected = async () => {
+  const getUserInfo = async () => {
     try {
       const res = await instance.get('/account/profile');
-      alert('Datos protegidos: ' + JSON.stringify(res.data));
+      setUserData(res.data)
+    } catch (err) {
+      console.error(err);
+      alert('No autorizado');
+    }
+  };
+  const getUserList = async () => {
+    try {
+      const res = await instance.get('/users/');
+      alert(JSON.stringify(res.data))
     } catch (err) {
       console.error(err);
       alert('No autorizado');
@@ -29,11 +39,17 @@ export default function App() {
 
   return (
     <View style={{ padding: 40 }}>
-      <Button title="Login" onPress={() => login('fran@gmail.com', 'admin123')} />
+      <Button title="Login" onPress={() => login('admin@admin.com', 'admin123', getUserInfo)} />
       <View style={{ height: 10 }} />
-      <Button title="Obtener datos cuenta" onPress={getProtected} />
+      <Button title="Obtener datos cuenta" onPress={getUserList} />
       <View style={{ height: 10 }} />
-      <Button title="Logout" onPress={logout} />
+      <Button title="Logout" onPress={() => logout(setUserData)} />
+
+      <View>
+        <Text>Username: {userData['username']}</Text>
+        <Text>Email: {userData['email']}</Text>
+        <Text>Role: {userData['role']}</Text>
+      </View>
     </View>
   );
 }
