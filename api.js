@@ -1,67 +1,68 @@
 import axios from 'axios';
+import * as SecureStore from 'expo-secure-store';
+import { getAccessToken, setAccessToken } from './utils/memory';
 
 const instance = axios.create({
-  baseURL: 'http://192.168.0.13:8000/',  // Tu backend
+  baseURL: 'https://backend-7yb8.onrender.com/',
 });
 
-// instance.interceptors.request.use(
-//   async config => {
-//     const token = getAccessToken();
-//     if (token) {
-//       config.headers.Authorization = `Bearer ${token}`;
-//     }
-//     return config;
-//   },
-//   error => Promise.reject(error)
-// );
+// Interceptor para añadir Authorization si hay token
+instance.interceptors.request.use(
+  (config) => {
+    const token = getAccessToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
-// let isRefreshing = false;
-// let failedQueue = [];
+// 👉 Interceptor de RESPONSE: manejar errores 401 y refrescar token
+instance.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
 
-// const processQueue = (error, token = null) => {
-//   failedQueue.forEach(prom => {
-//     if (error) prom.reject(error);
-//     else prom.resolve(token);
-//   });
-//   failedQueue = [];
-// };
+    // Si es 401 y no hemos intentado refrescar ya
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.url.includes('/token/refresh/') &&
+      !originalRequest.url.includes('/token/')
+    ) {
+      originalRequest._retry = true;
 
-// instance.interceptors.response.use(
-//   res => res,
-//   async err => {
-//     const originalRequest = err.config;
+      try {
+        const refreshRaw = await SecureStore.getItemAsync('refresh');
+        if (!refreshRaw) {
+          console.error('Error al refrescar access token: No refresh token guardado');
+          throw new Error('No refresh token');
+        }
+        const refresh = JSON.parse(refreshRaw);
 
-//     if (err.response?.status === 401 && !originalRequest._retry) {
-//       if (isRefreshing) {
-//         return new Promise(function (resolve, reject) {
-//           failedQueue.push({ resolve, reject });
-//         })
-//           .then(token => {
-//             originalRequest.headers.Authorization = `Bearer ${token}`;
-//             return axios(originalRequest);
-//           })
-//           .catch(Promise.reject);
-//       }
+        // Obtener nuevo access token
+        const res = await instance.post('/token/refresh/', { refresh });
+        const newAccess = res.data.access;
 
-//       originalRequest._retry = true;
-//       isRefreshing = true;
+        // Guardar nuevo token en memoria
+        setAccessToken(newAccess);
 
-//       try {
-//         const newToken = await refreshAccessToken();
-//         setAccessToken(newToken);
-//         processQueue(null, newToken);
-//         originalRequest.headers.Authorization = `Bearer ${newToken}`;
-//         return axios(originalRequest);
-//       } catch (err) {
-//         processQueue(err, null);
-//         return Promise.reject(err);
-//       } finally {
-//         isRefreshing = false;
-//       }
-//     }
+        // Actualizar header y reintentar petición original
+        originalRequest.headers.Authorization = `Bearer ${newAccess}`;
+        return instance(originalRequest);
+      } catch (refreshError) {
+        console.error('Error al refrescar token:', refreshError.response?.data || refreshError.message);
+        // Logout automático si falla el refresh
+        await SecureStore.deleteItemAsync('refresh');
+        setAccessToken(null);
+        return Promise.reject(refreshError);
+      }
+    }
 
-//     return Promise.reject(err);
-//   }
-// );
+    // Otro tipo de error
+    return Promise.reject(error);
+  }
+);
 
 export default instance;

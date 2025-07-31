@@ -1,27 +1,25 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Button, Text } from 'react-native';
-import { login, logout } from './auth';
-import axios from './api';
+import { login, logout, restoreSession, users } from './auth';
+import instance from './api';
+
 
 export default function App() {
-  const handleLogin = async () => {
-    try {
-      await login('admin@admin.com', 'admin123');  // Sustituye por valores reales
-      alert('Login correcto');
-    } catch (err) {
-      console.error(err);
-      alert('Error al iniciar sesión');
-    }
-  };
+  const [sessionRestored, setSessionRestored] = useState(false);
 
-  const handleLogout = async () => {
-    await logout();
-    alert('Cierre de sesión completo');
-  };
+  useEffect(() => {
+    const tryRestore = async () => {
+      await restoreSession();
+      setSessionRestored(true);
+    };
+    tryRestore();
+  }, []);
+
+  if (!sessionRestored) return <Text>Restaurando sesión...</Text>;
 
   const getProtected = async () => {
     try {
-      const res = await axios.get('/users/');
+      const res = await instance.get('/account/profile');
       alert('Datos protegidos: ' + JSON.stringify(res.data));
     } catch (err) {
       console.error(err);
@@ -31,11 +29,11 @@ export default function App() {
 
   return (
     <View style={{ padding: 40 }}>
-      <Button title="Login" onPress={handleLogin} />
+      <Button title="Login" onPress={() => login('fran@gmail.com', 'admin123')} />
       <View style={{ height: 10 }} />
-      <Button title="Obtener datos protegidos" onPress={getProtected} />
+      <Button title="Obtener datos cuenta" onPress={getProtected} />
       <View style={{ height: 10 }} />
-      <Button title="Logout" onPress={handleLogout} />
+      <Button title="Logout" onPress={logout} />
     </View>
   );
 }
