@@ -16,7 +16,7 @@ export default function App() {
     tryRestore();
   }, []);
 
-  if (!sessionRestored) return <Text>Restaurando sesión...</Text>;
+  if (!sessionRestored) return <Text>Restauring session...</Text>;
 
   const getUserInfo = async () => {
     try {
@@ -24,7 +24,7 @@ export default function App() {
       setUserData(res.data)
     } catch (err) {
       console.error(err);
-      alert('No autorizado');
+      alert('Non Authorized');
     }
   };
   const getUserList = async () => {
@@ -33,7 +33,7 @@ export default function App() {
       alert(JSON.stringify(res.data))
     } catch (err) {
       console.error(err);
-      alert('No autorizado');
+      alert('Non Authorized');
     }
   };
 
@@ -41,7 +41,7 @@ export default function App() {
     <View style={{ padding: 40 }}>
       <Button title="Login" onPress={() => login('admin@admin.com', 'admin123', getUserInfo)} />
       <View style={{ height: 10 }} />
-      <Button title="Obtener datos cuenta" onPress={getUserList} />
+      <Button title="Get Users List" onPress={getUserList} />
       <View style={{ height: 10 }} />
       <Button title="Logout" onPress={() => logout(setUserData)} />
 

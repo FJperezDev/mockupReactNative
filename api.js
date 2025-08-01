@@ -6,7 +6,7 @@ const instance = axios.create({
   baseURL: 'https://backend-7yb8.onrender.com/',
 });
 
-// Interceptor para añadir Authorization si hay token
+// Authorization interceptor
 instance.interceptors.request.use(
   (config) => {
     const token = getAccessToken();
@@ -18,13 +18,13 @@ instance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// 👉 Interceptor de RESPONSE: manejar errores 401 y refrescar token
+// Response interceptor: 401 code errors refreshing token
 instance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // Si es 401 y no hemos intentado refrescar ya
+    // If it is 401 and we didn't try refreshing yet
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
@@ -35,25 +35,25 @@ instance.interceptors.response.use(
         originalRequest._retry = true;
         const refreshRaw = await SecureStore.getItemAsync('refresh');
         const refresh = JSON.parse(refreshRaw);
-        // Obtener nuevo access token
+        // Get new access token
         const res = await instance.post('/token/refresh/', { refresh });
         const newAccess = res.data.access;
 
-        // Guardar nuevo token en memoria
+        // Save token in fast short term memory
         setAccessToken(newAccess);
 
-        // Actualizar header y reintentar petición original
+        // Update header and retry original request
         originalRequest.headers.Authorization = `Bearer ${newAccess}`;
         return instance(originalRequest);
       } catch (refreshError) {
-        // Logout automático si falla el refresh
+        // Automatic logout if refreshing fails
         await SecureStore.deleteItemAsync('refresh');
         setAccessToken(null);
         return Promise.reject(refreshError);
       }
     }
 
-    // Otro tipo de error
+    // Other error type
     return Promise.reject(error);
   }
 );

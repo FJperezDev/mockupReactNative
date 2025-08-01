@@ -15,7 +15,7 @@ export const login = async (email, password, getProtected) => {
     console.log('Login succesful');
     if(getProtected) getProtected();
   } catch (error) {
-    console.error('Login error:', error.response?.data || error.message);
+    console.warn('Login error:', error.response?.data || error.message);
     throw error;
   }
 };
@@ -33,7 +33,7 @@ export const register = async (data) => {
     const res = await instance.post('/register/', data);
     return res.data;
   } catch (err) {
-    console.error('Register error:', err.response?.data || err.message);
+    console.warn('Register error:', err.response?.data || err.message);
     throw err;
   }
 };
@@ -41,19 +41,19 @@ export const register = async (data) => {
 export const refreshAccessToken = async () => {
   try {
     const refreshRaw = await SecureStore.getItemAsync('refresh');
-    if (!refreshRaw) throw new Error('No refresh token guardado');
+    if (!refreshRaw) throw new Error('No refresh token saved');
 
     const refresh = JSON.parse(refreshRaw);
 
     const res = await instance.post('/token/refresh/', { refresh });
     const newAccess = res.data.access;
 
-    if (!newAccess) throw new Error('No se recibió nuevo access token');
+    if (!newAccess) throw new Error('Access token not received');
 
     setAccessToken(newAccess);
     return newAccess;
   } catch (err) {
-    console.error('Error al refrescar access token:', err.response?.data || err.message);
+    console.warn('Refreshing access token error:', err.response?.data || err.message);
     throw err;
   }
 };
@@ -63,7 +63,7 @@ export const restoreSession = async () => {
     await refreshAccessToken(); // si falla, se atrapará
     return true;
   } catch (err) {
-    console.warn('No se pudo restaurar la sesión');
+    console.warn("Couldn't restore session");
     return false;
   }
 };
