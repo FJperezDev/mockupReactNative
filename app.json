@@ -27,6 +27,12 @@
     },
     "plugins": [
       "expo-secure-store"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "8e627a62-0911-4239-888e-ee6a6f3b2683"
+      }
+    },
+    "owner": "fran1763"
   }
 }
