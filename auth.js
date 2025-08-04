@@ -1,6 +1,6 @@
 import instance from './api';
 import { getAccessToken, setAccessToken } from './utils/memory';
-import { getItem, saveItem, deleteItem } from './saveToken';
+import { getItem, saveItem, deleteItem } from './utils/saveToken';
 
 export const login = async (email, password) => {
 
