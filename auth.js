@@ -1,6 +1,6 @@
-import * as SecureStore from 'expo-secure-store';
 import instance from './api';
 import { getAccessToken, setAccessToken } from './utils/memory';
+import { getItem, saveItem, deleteItem } from './saveToken';
 
 export const login = async (email, password) => {
 
@@ -11,7 +11,7 @@ export const login = async (email, password) => {
     if(!access || !refresh) throw new Error('Tokens not arrived')
 
     setAccessToken(access);
-    await SecureStore.setItemAsync('refresh', JSON.stringify(refresh));
+    saveItem('refresh', JSON.stringify(refresh));
     console.log('Login succesful');
   } catch (error) {
     console.warn('Login error:', error.response?.data || error.message);
@@ -23,7 +23,7 @@ export const logout = async (setUserData) => {
 
   console.log('Logout succesful');
   if(setUserData) setUserData({})
-  await SecureStore.deleteItemAsync('refresh');
+  deleteItem('refresh');
   setAccessToken(null);
 };
 
@@ -39,7 +39,7 @@ export const register = async (data) => {
 
 export const refreshAccessToken = async () => {
   try {
-    const refreshRaw = await SecureStore.getItemAsync('refresh');
+    const refreshRaw = getItem('refresh');
     if (!refreshRaw) throw new Error('No refresh token saved');
 
     const refresh = JSON.parse(refreshRaw);
