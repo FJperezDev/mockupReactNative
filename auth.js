@@ -11,7 +11,7 @@ export const login = async (email, password) => {
     if(!access || !refresh) throw new Error('Tokens not arrived')
 
     setAccessToken(access);
-    saveItem('refresh', JSON.stringify(refresh));
+    await saveItem('refresh', JSON.stringify(refresh));
     console.log('Login succesful');
   } catch (error) {
     console.warn('Login error:', error.response?.data || error.message);
@@ -23,7 +23,11 @@ export const logout = async (setUserData) => {
 
   console.log('Logout succesful');
   if(setUserData) setUserData({})
-  deleteItem('refresh');
+  try {
+    await deleteItem('refresh');
+  } catch (err) {
+    console.warn('Error deleting refresh token:', err.message);
+  }
   setAccessToken(null);
 };
 
@@ -39,7 +43,7 @@ export const register = async (data) => {
 
 export const refreshAccessToken = async () => {
   try {
-    const refreshRaw = getItem('refresh');
+    const refreshRaw = await getItem('refresh');
     if (!refreshRaw) throw new Error('No refresh token saved');
 
     const refresh = JSON.parse(refreshRaw);

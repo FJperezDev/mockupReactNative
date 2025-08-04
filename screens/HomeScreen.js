@@ -1,47 +1,72 @@
 import React, { useContext, useEffect, useState } from "react";
-import { View, Text, Button } from "react-native";
+import { View, Text, Button, ScrollView } from "react-native";
 import { AuthContext } from "../components/AuthContext";
-import instance from "../api"
+import instance from "../api";
 import UserInfo from "../components/UserInfo";
 import UserList from "../components/UserList";
 
 export default function HomeScreen() {
   const [users, setUsers] = useState([]);
-  const [userData, setUserData] = useState({});
-  const { logout } = useContext(AuthContext);
+  const { logout, userData, setUserData } = useContext(AuthContext);
 
   useEffect(() => {
     const tryGetUserInfo = async () => {
-      try{
-          res = await instance.get('/account/profile');
-          setUserData(res.data)  
+      try {
+        const res = await instance.get("/account/profile");
+        setUserData(res.data);
+        console.log(res.data)
       } catch (err) {
-          console.error(err);
-          alert('Non Authorized');
+        console.error("Error al obtener perfil:", err);
+        alert("Non Authorized");
       }
     };
+
     tryGetUserInfo();
-        
-    }, []);
+  }, []);
+
+  useEffect(() => {
+    console.log("UserData actualizado:", userData);
+  }, [userData]);
 
   const tryGetUsersList = async () => {
     try {
-      const res = await instance.get('/users/');
+      const res = await instance.get("/users/");
       setUsers(res.data);
     } catch (err) {
-      console.warn('Error al obtener usuarios:', err);
-      alert('Non Authorized');
+      console.warn("Error al obtener usuarios:", err);
+      alert("Non Authorized");
     }
   };
 
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Text style={{ fontSize: 24 }}>Welcome Home!</Text>
-      <UserInfo username={userData['username']} email={userData['email']} role={userData['role']} />
-      <Button title="Get Users List" onPress={tryGetUsersList} />
-      <View padding={5}/>
-      <UserList users={users}/>
-      <Button title="Logout" onPress={logout} />
-    </View>
+    <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: "center", alignItems: "center", padding: 20 }}>
+      <Text style={{ fontSize: 24, marginBottom: 10 }}>Welcome Home!</Text>
+
+      {userData?.username ? (
+        <UserInfo
+          username={userData.username}
+          email={userData.email}
+          role={userData.role}
+        />
+      ) : (
+        <Text>Cargando perfil...</Text>
+      )}
+
+      <View style={{ marginVertical: 10 }}>
+        <Button title="Get Users List" onPress={tryGetUsersList} />
+      </View>
+
+      {users?(
+        <UserList
+          users={users}
+        />
+      ) : (
+        <Text>Cargando lista...</Text>
+      )}
+
+      <View style={{ marginTop: 20 }}>
+        <Button title="Logout" onPress={logout} />
+      </View>
+    </ScrollView>
   );
 }

@@ -6,6 +6,7 @@ import { restoreSession, logout as authLogout } from '../auth';
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  const [userData, setUserData] = useState({});
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -18,6 +19,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     await authLogout();
     setIsAuthenticated(false);
+    setUserData({});
   };
 
   useEffect(() => {
@@ -25,7 +27,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, logout, userData, setUserData }}>
       {!loading && children}
     </AuthContext.Provider>
   );

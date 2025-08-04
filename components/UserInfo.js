@@ -3,15 +3,10 @@ import { View, Text, StyleSheet } from 'react-native';
 
 const UserInfo = ({ username, email, role }) => {
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Username:</Text>
-      <Text style={styles.value}>{username}</Text>
-
-      <Text style={styles.label}>Email:</Text>
-      <Text style={styles.value}>{email}</Text>
-
-      <Text style={styles.label}>Role:</Text>
-      <Text style={styles.value}>{role}</Text>
+    <View key={user.id} style={styles.card}>
+      <Text style={styles.name}>👤 {username}</Text>
+      <Text style={styles.email}>📧 {email}</Text>
+      <Text style={styles.role}>🔐 Rol: {role}</Text>
     </View>
   );
 };
@@ -23,6 +18,18 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     margin: 20,
     elevation: 2,
+  },
+  name: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  email: {
+    fontSize: 14,
+    color: '#333',
+  },
+  role: {
+    fontSize: 14,
+    color: '#666',
   },
   label: {
     fontWeight: 'bold',
