@@ -1,6 +1,5 @@
 import instance from "./api";
 import {
-  getAccessToken,
   setAccessToken,
   getRefreshToken,
   setRefreshToken,
@@ -23,10 +22,21 @@ export const login = async (email, password) => {
   }
 };
 
-export const logout = async (setUserData) => {
+export const logout = async () => {
   console.log("Logout succesful");
-  if (setUserData) setUserData({});
   try {
+    const res = await instance.post("/logout/");
+    await deleteRefreshToken("refresh");
+    setAccessToken(null);
+  } catch (err) {
+    console.warn("Error deleting refresh token:", err.message);
+  }
+};
+
+export const logoutAll = async () => {
+  console.log("Logout from all devices");
+  try {
+    const res = await instance.post("/logout_all/");
     await deleteRefreshToken("refresh");
     setAccessToken(null);
   } catch (err) {

@@ -8,7 +8,7 @@ import UserList from "../components/UserList";
 export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [users, setUsers] = useState([]);
-  const { logout, userData, setUserData } =
+  const { logout, logoutAll, userData, setUserData } =
     useContext(AuthContext);
 
   useEffect(() => {
@@ -17,7 +17,7 @@ export default function HomeScreen() {
         const res = await instance.get("/account/profile");
         setUserData(res.data);
       } catch (err) {
-        console.error("Error al obtener perfil:", err);
+        console.error("Error fetching profile:", err);
         alert("Non Authorized");
       }
     };
@@ -31,7 +31,7 @@ export default function HomeScreen() {
       console.log("Data fetched");
       setUsers(res.data);
     } catch (err) {
-      console.warn("Error al obtener usuarios:", err);
+      console.warn("Error fetching users:", err);
       alert("Non Authorized");
     }
   };
@@ -52,8 +52,7 @@ export default function HomeScreen() {
       }
 
     } catch (err) {
-      console.warn("Error al refrescar datos:", err);
-      alert("Error al refrescar datos");
+      console.warn("Error refreshing users:", err);
     } finally {
       setRefreshing(false);
     }
@@ -88,6 +87,9 @@ export default function HomeScreen() {
 
       <View style={{ marginTop: 20 }}>
         <Button title="Logout" onPress={logout} />
+      </View>
+      <View style={{ marginTop: 20 }}>
+        <Button title="LogoutAll" onPress={logoutAll} />
       </View>
     </ScrollView>
   );

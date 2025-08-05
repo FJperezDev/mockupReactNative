@@ -1,7 +1,5 @@
 import React, { createContext, useEffect, useState } from 'react';
-// import * as SecureStore from 'expo-secure-store';
-import { restoreSession, logout as authLogout } from '../auth';
-// import { setAccessToken } from '../utils/memory';
+import { restoreSession, logout as authLogout, logoutAll as authLogoutAll } from '../auth';
 
 export const AuthContext = createContext();
 
@@ -22,12 +20,18 @@ export const AuthProvider = ({ children }) => {
     setUserData({});
   };
 
+  const logoutAll = async () => {
+    await authLogoutAll();
+    setIsAuthenticated(false);
+    setUserData({});
+  };
+
   useEffect(() => {
     checkSession();
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, logout, userData, setUserData }}>
+    <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, logout, logoutAll, userData, setUserData }}>
       {!loading && children}
     </AuthContext.Provider>
   );
