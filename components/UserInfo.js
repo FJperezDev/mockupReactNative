@@ -1,12 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-const UserInfo = ({ username, email, role }) => {
+const UserInfo = ({ user }) => {
   return (
     <View key={user.id} style={styles.card}>
-      <Text style={styles.name}>👤 {username}</Text>
-      <Text style={styles.email}>📧 {email}</Text>
-      <Text style={styles.role}>🔐 Rol: {role}</Text>
+      <Text style={styles.name}>👤 {user.username}</Text>
+      <Text style={styles.email}>📧 {user.email}</Text>
+      <Text style={styles.role}>🔐 Rol: {user.role}</Text>
     </View>
   );
 };

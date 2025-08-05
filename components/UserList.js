@@ -11,7 +11,7 @@ const UserList = ({ users }) => {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.list}>
         {users.map((user) => (
-          <UserInfo user={user} />
+          <UserInfo key={user.id} user={user} />
         ))}
       </ScrollView>
     </View>
