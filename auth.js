@@ -25,7 +25,7 @@ export const login = async (email, password) => {
 export const logout = async () => {
   console.log("Logout succesful");
   try {
-    const res = await instance.post("/logout/");
+    await instance.post("/logout/");
     await deleteRefreshToken("refresh");
     setAccessToken(null);
   } catch (err) {
@@ -36,7 +36,7 @@ export const logout = async () => {
 export const logoutAll = async () => {
   console.log("Logout from all devices");
   try {
-    const res = await instance.post("/logout_all/");
+    await instance.post("/logout_all/");
     await deleteRefreshToken("refresh");
     setAccessToken(null);
   } catch (err) {
@@ -59,8 +59,7 @@ export const refreshAccessToken = async () => {
     
     const refresh = await getRefreshToken();
     if (!refresh) throw new Error("No refresh token saved");
-
-    console.log(JSON.stringify(refresh));
+    
     const res = await instance.post("/token/refresh/", { refresh });
     const newAccess = res.data.access;
     if (res.data.refresh) {

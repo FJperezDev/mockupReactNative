@@ -10,10 +10,10 @@ export default function RegisterScreen({ navigation }) {
   const handleRegister = async () => {
     try {
       await register({ email, password, username });
-      Alert.alert('Registro exitoso', 'Ahora puedes iniciar sesión');
+      Alert.alert('Successful SignUp', 'Try LogIn');
       navigation.navigate('Login');
     } catch (err) {
-      Alert.alert('Error en el registro', 'Verifica los datos');
+      Alert.alert('SignUp Error', 'Verify Data');
     }
   };
 

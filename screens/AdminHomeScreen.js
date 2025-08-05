@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useState } from "react";
 import { View, Text, Button, ScrollView, RefreshControl } from "react-native";
-import { AuthContext } from "../components/AuthContext";
+import { AuthContext } from "../components";
 import instance from "../api";
-import UserInfo from "../components/UserInfo";
-import UserList from "../components/UserList";
+import { UserInfo } from "../components";
+import { UserList } from "../components";
 
-export default function HomeScreen() {
+export default function AdminHomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [users, setUsers] = useState([]);
   const { logout, logoutAll, userData, setUserData } =
@@ -28,7 +28,6 @@ export default function HomeScreen() {
   const tryGetUsersList = async () => {
     try {
       const res = await instance.get("/users/");
-      console.log("Data fetched");
       setUsers(res.data);
     } catch (err) {
       console.warn("Error fetching users:", err);

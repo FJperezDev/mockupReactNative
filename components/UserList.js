@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
-import UserInfo from './UserInfo';
+import { UserInfo } from '.';
 
 const UserList = ({ users }) => {
   if (!users || users.length === 0) {
