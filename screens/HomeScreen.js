@@ -1,27 +1,15 @@
 import React, { useContext, useEffect, useState } from "react";
-import { View, Text, Button, ScrollView } from "react-native";
+import { View, Text, Button, ScrollView, RefreshControl } from "react-native";
 import { AuthContext } from "../components/AuthContext";
 import instance from "../api";
 import UserInfo from "../components/UserInfo";
 import UserList from "../components/UserList";
 
 export default function HomeScreen() {
+  const [refreshing, setRefreshing] = useState(false);
   const [users, setUsers] = useState([]);
-  const { logout, userData, setUserData, lastFetched, setLastFetched } =
+  const { logout, userData, setUserData } =
     useContext(AuthContext);
-
-  useEffect(() => {
-    const updateUserInfoIfNeeded = async () => {
-      // Si no hay datos, o han pasado más de X minutos
-      if (!userData || Date.now() - lastFetched > 5 * 60 * 1000) {
-        const res = await instance.get("/account/profile");
-        setUserData(res.data);
-        setLastFetched(Date.now());
-      }
-    };
-
-    updateUserInfoIfNeeded();
-  }, []);
 
   useEffect(() => {
     const tryGetUserInfo = async () => {
@@ -48,6 +36,30 @@ export default function HomeScreen() {
     }
   };
 
+  const onRefresh = async () => {
+    try {
+      setRefreshing(true);
+
+      // User profile
+      const profileRes = await instance.get("/account/profile");
+      setUserData(profileRes.data);
+
+      if(profileRes.data['role'] !== 'user'){
+        const usersRes = await instance.get("/users/");
+        setUsers(usersRes.data);
+      }else{
+        setUsers([]);
+      }
+
+    } catch (err) {
+      console.warn("Error al refrescar datos:", err);
+      alert("Error al refrescar datos");
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+
   return (
     <ScrollView
       contentContainerStyle={{
@@ -56,6 +68,9 @@ export default function HomeScreen() {
         alignItems: "center",
         padding: 20,
       }}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
     >
       <Text style={{ fontSize: 24, marginBottom: 10 }}>Welcome Home!</Text>
 
