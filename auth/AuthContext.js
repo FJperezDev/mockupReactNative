@@ -19,12 +19,10 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = async (email, password) => {
-    const user = await authLogin(email, password);
-
-    setUserData(user);
+    
+    await authLogin(email, password);
     setIsAuthenticated(true);
     setLoading(false);
-    setIsAdmin(user['role'] !== 'user');
     
   };
 
@@ -42,36 +40,46 @@ export const AuthProvider = ({ children }) => {
     setUserData({});
   };
 
-  const tryGetUsersList = async () => {
+  const getLoggedUserInfo = async () => {
+    if(isAuthenticated){
+      try{
+        const res = await instance.get("/account/profile");
+        setUserData(res.data);
+        return res.data;
+      }catch(err){
+        console.error("Error fetching logged user data: ", err);
+        return null;
+      }
+    }
+  }
 
-    if(isAdmin){
+  const getUsersList = async (isAdminNow = isAdmin) => {
+
+    if(isAdminNow){
       try {
         const res = await instance.get("/users/");
         setUsers(res.data);
+        return res.data;
       } catch (err) {
-        console.warn("Error fetching users:", err);
+        console.error("Error fetching users list: ", err);
+        setUsers([]);
+        return null;
       }
     }else{
-      console.warn("Non authorized user:", err);
-      alert("Non Authorized user");
+      setUsers([]);
     }
   };
 
   const onRefresh = async () => {
     try {
       setRefreshing(true);
-
       // User profile
-      const profileRes = await instance.get("/account/profile");
-      setUserData(profileRes.data);
-
-      if(isAdmin){
-        const usersRes = await instance.get("/users/");
-        setUsers(usersRes.data);
-      }else{
-        setUsers([]);
-      }
-
+      const profile = await getLoggedUserInfo();
+      const isAdminNow = profile['role'] !== 'user'
+      
+      setIsAuthenticated(true);
+      setIsAdmin(isAdminNow);
+      await getUsersList(isAdminNow);
     } catch (err) {
       console.warn("Error refreshing users:", err);
     } finally {
@@ -84,7 +92,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, login, logout, logoutAll, userData, setUserData, isAdmin, onRefresh, refreshing,  tryGetUsersList, users }}>
+    <AuthContext.Provider value={{ login, logout, logoutAll, isAuthenticated, isAdmin, setUserData, userData, onRefresh, refreshing,  getUsersList, users }}>
       {!loading && children}
     </AuthContext.Provider>
   );

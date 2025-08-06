@@ -3,6 +3,7 @@ import { getAccessToken, setAccessToken, getRefreshToken, setRefreshToken, delet
 
 export const instance = axios.create({
   baseURL: 'https://backend-7yb8.onrender.com/',
+  // baseURL: 'http://localhost:8081/',
 });
 
 let isRefreshing = false;
@@ -43,7 +44,8 @@ instance.interceptors.response.use(
       error.response?.status === 401 &&
       !originalRequest._retry &&
       !originalRequest.url.includes('/token/refresh/') &&
-      !originalRequest.url.includes('/token/')
+      !originalRequest.url.includes('/login/') &&
+      !originalRequest.url.includes('/logout/')
     ) {
 
       originalRequest._retry = true;
@@ -97,14 +99,13 @@ instance.interceptors.response.use(
 export const login = async (email, password) => {
   try {
     const res = await instance.post("/login/", { email, password });
-    const { access, refresh, user } = res.data;
+    const { access, refresh } = res.data;
 
     if (!access || !refresh) throw new Error("Tokens not arrived");
 
     setAccessToken(access);
     await setRefreshToken(refresh);
     console.log("Login succesful");
-    return user;
   } catch (error) {
     console.warn("Login error:", error.response?.data || error.message);
     throw error;
@@ -113,22 +114,14 @@ export const login = async (email, password) => {
 
 export const logout = async () => {
   console.log("Logout succesful");
-  try {
-    await instance.post("/logout/");
-    await deleteRefreshToken("refresh");
-    setAccessToken(null);
-  } catch (err) {
-    console.warn("Error deleting refresh token:", err.message);
-  }
+  await deleteRefreshToken("refresh");
+  setAccessToken(null);
+  await instance.post("/logout/");
 };
 
 export const logoutAll = async () => {
   console.log("Logout from all devices");
-  try {
-    await instance.post("/logout_all/");
-    await deleteRefreshToken("refresh");
-    setAccessToken(null);
-  } catch (err) {
-    console.warn("Error deleting refresh token:", err.message);
-  }
+  await deleteRefreshToken("refresh");
+  setAccessToken(null);
+  await instance.post("/logout_all/");
 };

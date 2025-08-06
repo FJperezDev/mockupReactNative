@@ -19,8 +19,11 @@ const UserList = ({ users }) => {
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: "#6294ffff",
+    borderRadius: 20,
     maxHeight: Dimensions.get('window').height * 0.5,
     marginHorizontal: 16,
+    padding:20,
   },
   list: {
     paddingVertical: 8,

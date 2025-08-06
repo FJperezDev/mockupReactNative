@@ -5,8 +5,7 @@ import { UserInfo } from "../components";
 import { UserList } from "../components";
 
 export default function UserHomeScreen() {
-  const { logout, logoutAll, userData, onRefresh, tryGetUsersList, refreshing, users } =
-    useContext(AuthContext);
+  const { logout, logoutAll, userData, onRefresh, refreshing, users } = useContext(AuthContext);
 
   useEffect(() => {
     onRefresh();
@@ -31,10 +30,6 @@ export default function UserHomeScreen() {
       ) : (
         <Text>Cargando perfil...</Text>
       )}
-
-      <View style={{ marginVertical: 10 }}>
-        <Button title="Get Users List" onPress={tryGetUsersList} />
-      </View>
 
       {users ? <UserList users={users} /> : <Text>Cargando lista...</Text>}
 
