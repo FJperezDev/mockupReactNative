@@ -21,6 +21,10 @@ export default function AdminHomeScreen() {
     }
   };
 
+  useEffect(() => {
+    onRefresh();
+  }, []);
+
   const onRefresh = async () => {
     try {
       setRefreshing(true);
@@ -56,7 +60,7 @@ export default function AdminHomeScreen() {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
-      <Text style={{ fontSize: 24, marginBottom: 10 }}>Welcome Home!</Text>
+      <Text style={{ fontSize: 24, marginBottom: 10 }}>Welcome Admin!</Text>
 
       {userData ? (
         <UserInfo user={userData} />

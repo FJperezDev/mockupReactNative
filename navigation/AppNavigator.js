@@ -1,20 +1,22 @@
 import React, { useContext } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { AuthContext } from '../auth';
-import { AuthNavigator } from '../auth';
-import { UserHomeScreen } from '../screens';
-import { UnauthorizedScreen } from '../screens';
+import { AuthContext, AuthNavigator } from '../auth';
+import { UserHomeScreen, AdminHomeScreen, UnauthorizedScreen } from '../screens';
 
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
-  const { isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated, isAdmin } = useContext(AuthContext);
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {isAuthenticated ? (
+      {isAdmin ? (
+        <Stack.Screen name="Home" component={AdminHomeScreen} />
+      ) : 
+      isAuthenticated ? (
         <Stack.Screen name="Home" component={UserHomeScreen} />
-      ) : (
+      ) : 
+      (
         <>
           <Stack.Screen name="Auth" component={AuthNavigator} />
           <Stack.Screen name="401" component={UnauthorizedScreen} />

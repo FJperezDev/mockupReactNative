@@ -9,7 +9,7 @@ export default function UserHomeScreen() {
 
   useEffect(() => {
     onRefresh();
-  }, []);
+  }, [userData.role]);
 
   return (
     <ScrollView

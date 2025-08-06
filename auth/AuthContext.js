@@ -38,6 +38,7 @@ export const AuthProvider = ({ children }) => {
     setIsAdmin(false);
     setIsAuthenticated(false);
     setUserData({});
+    logout();
   };
 
   const getLoggedUserInfo = async () => {
@@ -67,7 +68,7 @@ export const AuthProvider = ({ children }) => {
       }
     }else{
       setUsers([]);
-    }
+    } 
   };
 
   const onRefresh = async () => {
