@@ -1,48 +1,9 @@
-import instance from "./api";
+import { instance } from "./sessionApi";
 import {
   setAccessToken,
   getRefreshToken,
   setRefreshToken,
-  deleteRefreshToken
-} from "./utils/memory";
-
-export const login = async (email, password) => {
-  try {
-    const res = await instance.post("/token/", { email, password });
-    const { access, refresh } = res.data;
-
-    if (!access || !refresh) throw new Error("Tokens not arrived");
-
-    setAccessToken(access);
-    await setRefreshToken(refresh);
-    console.log("Login succesful");
-  } catch (error) {
-    console.warn("Login error:", error.response?.data || error.message);
-    throw error;
-  }
-};
-
-export const logout = async () => {
-  console.log("Logout succesful");
-  try {
-    await instance.post("/logout/");
-    await deleteRefreshToken("refresh");
-    setAccessToken(null);
-  } catch (err) {
-    console.warn("Error deleting refresh token:", err.message);
-  }
-};
-
-export const logoutAll = async () => {
-  console.log("Logout from all devices");
-  try {
-    await instance.post("/logout_all/");
-    await deleteRefreshToken("refresh");
-    setAccessToken(null);
-  } catch (err) {
-    console.warn("Error deleting refresh token:", err.message);
-  }
-};
+} from "../utils/memory";
 
 export const register = async (data) => {
   try {

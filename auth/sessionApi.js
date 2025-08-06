@@ -1,8 +1,7 @@
 import axios from 'axios';
-import { getAccessToken, setAccessToken, getRefreshToken, setRefreshToken } from './utils/memory';
-import { logout } from './auth';
+import { getAccessToken, setAccessToken, getRefreshToken, setRefreshToken, deleteRefreshToken } from '../utils/memory';
 
-const instance = axios.create({
+export const instance = axios.create({
   baseURL: 'https://backend-7yb8.onrender.com/',
 });
 
@@ -57,7 +56,7 @@ instance.interceptors.response.use(
         })
           .then(token => {
             originalRequest.headers['Authorization'] = 'Bearer ' + token;
-            return api(originalRequest);
+            return instance(originalRequest);
           })
           .catch(err => Promise.reject(err));
       }
@@ -95,4 +94,41 @@ instance.interceptors.response.use(
   }
 );
 
-export default instance;
+export const login = async (email, password) => {
+  try {
+    const res = await instance.post("/login/", { email, password });
+    const { access, refresh, user } = res.data;
+
+    if (!access || !refresh) throw new Error("Tokens not arrived");
+
+    setAccessToken(access);
+    await setRefreshToken(refresh);
+    console.log("Login succesful");
+    return user;
+  } catch (error) {
+    console.warn("Login error:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const logout = async () => {
+  console.log("Logout succesful");
+  try {
+    await instance.post("/logout/");
+    await deleteRefreshToken("refresh");
+    setAccessToken(null);
+  } catch (err) {
+    console.warn("Error deleting refresh token:", err.message);
+  }
+};
+
+export const logoutAll = async () => {
+  console.log("Logout from all devices");
+  try {
+    await instance.post("/logout_all/");
+    await deleteRefreshToken("refresh");
+    setAccessToken(null);
+  } catch (err) {
+    console.warn("Error deleting refresh token:", err.message);
+  }
+};

@@ -1,10 +1,10 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
-import { login } from '../auth';
-import { AuthContext } from '../components/AuthContext';
+import { AuthContext } from '../auth/AuthContext';
+
 
 export default function LoginScreen({ navigation }) {
-  const { isAuthenticated, setIsAuthenticated } = useContext(AuthContext);
+  const { login, isAuthenticated } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -15,12 +15,7 @@ export default function LoginScreen({ navigation }) {
   }, [isAuthenticated]);
 
   const handleLogin = async () => {
-    try {
-      await login(email, password);
-      setIsAuthenticated(true);
-    } catch (err) {
-      Alert.alert('Login error', 'Credenciales inválidas');
-    }
+    await login(email, password);
   };
 
   return (

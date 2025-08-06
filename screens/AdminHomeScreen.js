@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { View, Text, Button, ScrollView, RefreshControl } from "react-native";
-import { AuthContext } from "../components";
-import instance from "../api";
+import { AuthContext } from "../auth";
+import { instance } from "../auth/sessionApi";
 import { UserInfo } from "../components";
 import { UserList } from "../components";
 
@@ -10,20 +10,6 @@ export default function AdminHomeScreen() {
   const [users, setUsers] = useState([]);
   const { logout, logoutAll, userData, setUserData } =
     useContext(AuthContext);
-
-  useEffect(() => {
-    const tryGetUserInfo = async () => {
-      try {
-        const res = await instance.get("/account/profile");
-        setUserData(res.data);
-      } catch (err) {
-        console.error("Error fetching profile:", err);
-        alert("Non Authorized");
-      }
-    };
-
-    tryGetUserInfo();
-  }, []);
 
   const tryGetUsersList = async () => {
     try {

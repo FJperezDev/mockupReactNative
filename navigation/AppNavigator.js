@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { AuthContext } from '../components';
-import { AuthNavigator } from '.';
+import { AuthContext } from '../auth';
+import { AuthNavigator } from '../auth';
 import { UserHomeScreen } from '../screens';
 import { UnauthorizedScreen } from '../screens';
 

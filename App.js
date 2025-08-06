@@ -1,5 +1,5 @@
 import { NavigationContainer } from '@react-navigation/native';
-import { AuthProvider } from './components';
+import { AuthProvider } from './auth';
 import { AppNavigator } from './navigation';
 
 const App = () => {
