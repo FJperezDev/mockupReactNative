@@ -6,15 +6,24 @@ import {
   View,
   TextInput,
   Button,
+  ScrollView,
 } from "react-native";
 import { getUserInfo, updateUserInfo } from "../api";
 import { Picker } from "@react-native-picker/picker";
+import { AuthContext } from "./AuthContext";
+import { useContext } from "react";
 
-const UserInfo = ({ userData, canEdit, onRefresh }) => {
+const UserInfo = ({ userData, onRefresh }) => {
+  const { isSuperAdmin } = useContext(AuthContext);
+
   if (!userData) {
     return <Text>Cargando...</Text>;
   }
-  const [editView, setEditView] = useState(false);
+
+  let activeOpacity = 0.6;
+  if(!onRefresh)
+    activeOpacity = 1;
+  const [canEdit, setCanEdit] = useState(false);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState(userData?.role || "user");
@@ -27,12 +36,12 @@ const UserInfo = ({ userData, canEdit, onRefresh }) => {
     }
   }, [userData]);
 
-  const toggleEditView = () => {
-    if (!editView) {
+  const toggleCanEdit = () => {
+    if (!canEdit) {
       setUsername(userData.username);
       setEmail(userData.email);
     }
-    setEditView((prev) => !prev);
+    setCanEdit((prev) => !prev);
   };
 
   const handleEdit = async () => {
@@ -42,47 +51,61 @@ const UserInfo = ({ userData, canEdit, onRefresh }) => {
     data.role = role;
     const updatedUser = await updateUserInfo(data);
     if (onRefresh) onRefresh();
-    setEditView(false);
+    setCanEdit(false);
   };
 
   return (
     <View style={styles.wrapper}>
       <TouchableOpacity
         style={styles.container}
-        activeOpacity={!canEdit || 0.6}
+        activeOpacity={activeOpacity}
         accessibilityHint="user page"
-        onPress={toggleEditView}
+        onPress={toggleCanEdit}
       >
         <Text style={styles.name}>👤 {userData.username}</Text>
         <Text style={styles.email}>📧 {userData.email}</Text>
         <Text style={styles.role}>🔐 Rol: {userData.role}</Text>
       </TouchableOpacity>
 
-      {canEdit && editView && (
+      { onRefresh && canEdit && (
         <View style={styles.container}>
-          <TextInput
-            style={styles.input}
-            placeholder="Username"
-            value={username}
-            onChangeText={setUsername}
-          />
-
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
-          />
-
-          <Picker
-            selectedValue={role}
-            onValueChange={(itemValue) => setRole(itemValue)}
-            style={styles.picker}
+          <ScrollView
+            horizontal={true}
+            contentContainerStyle={styles.row}
+            scrollEnabled={false}
           >
-            <Picker.Item label="User" value="user" />
-            <Picker.Item label="Admin" value="admin" />
-            <Picker.Item label="Superadmin" value="superadmin" />
-          </Picker>
+            <View style={styles.inputsContainer}>
+              <TextInput
+                style={styles.input}
+                placeholder="Username"
+                value={username}
+                onChangeText={setUsername}
+              />
+
+              <TextInput
+                style={styles.input}
+                placeholder="Email"
+                value={email}
+                onChangeText={setEmail}
+              />
+            </View>
+
+            
+            { isSuperAdmin && (<View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={role}
+                onValueChange={(itemValue) => setRole(itemValue)}
+                style={styles.picker}
+                mode="dropdown"
+              >
+                <Picker.Item label="User" value="user" />
+                <Picker.Item label="Admin" value="admin" />
+                <Picker.Item label="Superadmin" value="superadmin" />
+
+              </Picker>
+            </View>)}
+
+          </ScrollView>
 
           <Button title="Guardar cambios" onPress={handleEdit} />
         </View>
@@ -104,8 +127,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ccc",
     padding: 12,
-    marginBottom: 12,
+    marginTop: 12,
     borderRadius: 6,
+    width: "100%"
   },
   name: {
     fontSize: 18,
@@ -121,6 +145,24 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
     padding: 2,
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  inputsContainer: {
+    flex: 1,
+    marginRight: 5,
+    marginBottom: 10,
+  },
+  pickerContainer: {
+    marginLeft: 5,
+    width: 120,
+  },
+  picker: {
+    // width: "75%",
+    // height: 50,  // si quieres ajustar alto del picker
   },
 });
 

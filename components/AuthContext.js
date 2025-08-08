@@ -4,9 +4,10 @@ import { login as authLogin, logout as authLogout, logoutAll as authLogoutAll, r
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [userData, setUserData] = useState({});
+  const [loggedUser, setLoggedUser] = useState({});
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [users, setUsers] = useState([]);
@@ -29,14 +30,16 @@ export const AuthProvider = ({ children }) => {
     await authLogout();
     setIsAuthenticated(false);
     setIsAdmin(false);
-    setUserData({});
+    setIsSuperAdmin(false);
+    setLoggedUser({});
   };
 
   const logoutAll = async () => {
     await authLogoutAll();
     setIsAdmin(false);
+    setIsSuperAdmin(false);
     setIsAuthenticated(false);
-    setUserData({});
+    setLoggedUser({});
     logout();
   };
 
@@ -46,9 +49,11 @@ export const AuthProvider = ({ children }) => {
       // User profile
       const profile = await getLoggedUserInfo();
       const isAdminNow = profile['role'] !== 'user'
-      setUserData(profile);
+      const isSuperAdminNow = profile['role'] === 'superadmin'
+      setLoggedUser(profile);
       setIsAuthenticated(true);
       setIsAdmin(isAdminNow);
+      setIsSuperAdmin(isSuperAdminNow);
       if(isAdminNow)
         setUsers(await getUsersList());
       else
@@ -65,7 +70,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ login, logout, logoutAll, isAuthenticated, isAdmin, setUserData, userData, onRefresh, refreshing, users }}>
+    <AuthContext.Provider value={{ login, logout, logoutAll, isAuthenticated, isAdmin, isSuperAdmin, setLoggedUser, loggedUser, onRefresh, refreshing, users }}>
       {!loading && children}
     </AuthContext.Provider>
   );
