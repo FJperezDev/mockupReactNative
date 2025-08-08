@@ -1,52 +1,13 @@
 import React, { useContext, useEffect, useState } from "react";
 import { View, Text, Button, ScrollView, RefreshControl } from "react-native";
-import { AuthContext } from "../auth";
-import { instance } from "../auth/sessionApi";
-import { UserInfo } from "../components";
-import { UserList } from "../components";
+import { AuthContext, UserInfo, UserList } from "../components";
 
 export default function AdminHomeScreen() {
-  const [refreshing, setRefreshing] = useState(false);
-  const [users, setUsers] = useState([]);
-  const { logout, logoutAll, userData, setUserData } =
-    useContext(AuthContext);
-
-  const tryGetUsersList = async () => {
-    try {
-      const res = await instance.get("/users/");
-      setUsers(res.data);
-    } catch (err) {
-      console.warn("Error fetching users:", err);
-      alert("Non Authorized");
-    }
-  };
-
-  useEffect(() => {
-    onRefresh();
-  }, []);
-
-  const onRefresh = async () => {
-    try {
-      setRefreshing(true);
-
-      // User profile
-      const profileRes = await instance.get("/account/profile");
-      setUserData(profileRes.data);
-
-      if(profileRes.data['role'] !== 'user'){
-        const usersRes = await instance.get("/users/");
-        setUsers(usersRes.data);
-      }else{
-        setUsers([]);
-      }
-
-    } catch (err) {
-      console.warn("Error refreshing users:", err);
-    } finally {
-      setRefreshing(false);
-    }
-  };
-
+  const { logout, logoutAll, userData, onRefresh, refreshing, users } = useContext(AuthContext);
+  
+    useEffect(() => {
+      onRefresh();
+    }, []);
 
   return (
     <ScrollView
@@ -67,10 +28,6 @@ export default function AdminHomeScreen() {
       ) : (
         <Text>Cargando perfil...</Text>
       )}
-
-      <View style={{ marginVertical: 10 }}>
-        <Button title="Get Users List" onPress={tryGetUsersList} />
-      </View>
 
       {users ? <UserList users={users} /> : <Text>Cargando lista...</Text>}
 

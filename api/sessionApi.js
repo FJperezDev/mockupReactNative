@@ -1,10 +1,6 @@
-import axios from 'axios';
-import { getAccessToken, setAccessToken, getRefreshToken, setRefreshToken, deleteRefreshToken } from '../utils/memory';
 
-export const instance = axios.create({
-  baseURL: 'https://backend-7yb8.onrender.com/',
-  // baseURL: 'http://localhost:8081/',
-});
+import { setRefreshToken, getRefreshToken, setAccessToken, getAccessToken, deleteRefreshToken,  } from '../utils/memory';
+import { instance } from './api'
 
 let isRefreshing = false;
 let failedQueue = [];
@@ -124,4 +120,48 @@ export const logoutAll = async () => {
   await deleteRefreshToken("refresh");
   setAccessToken(null);
   await instance.post("/logout_all/");
+};
+
+export const register = async (data) => {
+  try {
+    const res = await instance.post("/register/", data);
+    return res.data;
+  } catch (err) {
+    console.warn("Register error:", err.response?.data || err.message);
+    throw err;
+  }
+};
+
+export const refreshAccessToken = async () => {
+  try {
+    
+    const refresh = await getRefreshToken();
+    if (!refresh) throw new Error("No refresh token saved");
+    
+    const res = await instance.post("/token/refresh/", { refresh });
+    const newAccess = res.data.access;
+    if (res.data.refresh) {
+      await setRefreshToken(res.data.refresh); 
+    }
+    if (!newAccess) throw new Error("Access token not received");
+
+    setAccessToken(newAccess);
+    return newAccess;
+  } catch (err) {
+    console.warn(
+      "Refreshing access token error:",
+      err.response?.data || err.message
+    );
+    throw err;
+  }
+};
+
+export const restoreSession = async () => {
+  try {
+    await refreshAccessToken(); // si falla, se atrapará
+    return true;
+  } catch (err) {
+    console.warn("Couldn't restore session", err);
+    return false;
+  }
 };

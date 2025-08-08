@@ -1,6 +1,5 @@
 import React, { createContext, useEffect, useState } from 'react';
-import { login as authLogin, logout as authLogout, logoutAll as authLogoutAll, instance } from './sessionApi';
-import { restoreSession } from './auth';
+import { login as authLogin, logout as authLogout, logoutAll as authLogoutAll, restoreSession, getLoggedUserInfo, getUsersList } from '../api';
 
 export const AuthContext = createContext();
 
@@ -41,46 +40,19 @@ export const AuthProvider = ({ children }) => {
     logout();
   };
 
-  const getLoggedUserInfo = async () => {
-    if(isAuthenticated){
-      try{
-        const res = await instance.get("/account/profile");
-        setUserData(res.data);
-        return res.data;
-      }catch(err){
-        console.error("Error fetching logged user data: ", err);
-        return null;
-      }
-    }
-  }
-
-  const getUsersList = async (isAdminNow = isAdmin) => {
-
-    if(isAdminNow){
-      try {
-        const res = await instance.get("/users/");
-        setUsers(res.data);
-        return res.data;
-      } catch (err) {
-        console.error("Error fetching users list: ", err);
-        setUsers([]);
-        return null;
-      }
-    }else{
-      setUsers([]);
-    } 
-  };
-
   const onRefresh = async () => {
     try {
       setRefreshing(true);
       // User profile
       const profile = await getLoggedUserInfo();
       const isAdminNow = profile['role'] !== 'user'
-      
+      setUserData(profile);
       setIsAuthenticated(true);
       setIsAdmin(isAdminNow);
-      await getUsersList(isAdminNow);
+      if(isAdminNow)
+        setUsers(await getUsersList());
+      else
+        setUsers([])
     } catch (err) {
       console.warn("Error refreshing users:", err);
     } finally {
@@ -93,7 +65,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ login, logout, logoutAll, isAuthenticated, isAdmin, setUserData, userData, onRefresh, refreshing,  getUsersList, users }}>
+    <AuthContext.Provider value={{ login, logout, logoutAll, isAuthenticated, isAdmin, setUserData, userData, onRefresh, refreshing, users }}>
       {!loading && children}
     </AuthContext.Provider>
   );

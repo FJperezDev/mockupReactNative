@@ -1,15 +1,13 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import { View, Text, Button, ScrollView, RefreshControl } from "react-native";
-import { AuthContext } from "../auth/AuthContext";
-import { UserInfo } from "../components";
-import { UserList } from "../components";
+import { AuthContext, UserInfo, UserList } from "../components";
 
 export default function UserHomeScreen() {
   const { logout, logoutAll, userData, onRefresh, refreshing, users } = useContext(AuthContext);
 
   useEffect(() => {
     onRefresh();
-  }, [userData.role]);
+  }, []);
 
   return (
     <ScrollView

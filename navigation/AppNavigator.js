@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { AuthContext, AuthNavigator } from '../auth';
+import { AuthContext } from '../components';
+import AuthNavigator from './AuthNavigator';
 import { UserHomeScreen, AdminHomeScreen, UnauthorizedScreen } from '../screens';
 
 const Stack = createNativeStackNavigator();

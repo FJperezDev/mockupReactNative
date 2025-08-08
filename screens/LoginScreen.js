@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
-import { AuthContext } from '../auth/AuthContext';
+import { AuthContext } from '../components';
 
 
 export default function LoginScreen({ navigation }) {
