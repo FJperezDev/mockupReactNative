@@ -35,7 +35,6 @@ instance.interceptors.response.use(
   async error => {
     const originalRequest = error.config;
 
-    // If it is 401 and we didn't try refreshing yet
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
@@ -43,13 +42,10 @@ instance.interceptors.response.use(
       !originalRequest.url.includes('/login/') &&
       !originalRequest.url.includes('/logout/')
     ) {
-
       originalRequest._retry = true;
-      isRefreshing = true;
 
       if (isRefreshing) {
-        // Requests queue while access token is being updated
-        return new Promise(function(resolve, reject) {
+        return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
           .then(token => {
@@ -59,26 +55,23 @@ instance.interceptors.response.use(
           .catch(err => Promise.reject(err));
       }
 
+      isRefreshing = true;
+
       try {
-        
         const refresh = await getRefreshToken();
-        // Get new access token
         const res = await instance.post('/token/refresh/', { refresh });
         const newAccess = res.data.access;
         if (res.data.refresh) {
-          await setRefreshToken(res.data.refresh); 
+          await setRefreshToken(res.data.refresh);
         }
 
-        // Save token in fast short term memory
         setAccessToken(newAccess);
-
-        // Update header and retry original request
-        originalRequest.headers.Authorization = `Bearer ${newAccess}`;
         processQueue(null, newAccess);
+
+        originalRequest.headers.Authorization = `Bearer ${newAccess}`;
         return instance(originalRequest);
       } catch (refreshError) {
-        processQueue(err, null);
-        // Automatic logout if refreshing fails
+        processQueue(refreshError, null);
         logout();
         Alert.alert("Expired Session", "Try login again.");
         return Promise.reject(refreshError);
@@ -87,7 +80,6 @@ instance.interceptors.response.use(
       }
     }
 
-    // Other error type
     return Promise.reject(error);
   }
 );

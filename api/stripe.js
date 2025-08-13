@@ -44,15 +44,12 @@ export const initializePayment = async (setLoading, priceId) => {
 export const openPaymentSheet = async (setLoading) => {
     setLoading(true);
     const result = await presentPaymentSheet();
-    console.log(result);
+    console.log(result.error);
     setLoading(false);
-    if (result.error.stripeErrorCode) {
-        console.log("si")
-        Alert.alert("Error en el pago", result.error.message || JSON.stringify(result.error.stripeErrorCode));
+    if (result.error) {
+        alert("Error en el pago", result.error.message || JSON.stringify(result.error.stripeErrorCode));
     } else {
-        console.log("no")
-
-        Alert.alert("Pago completado", "El pago fue aceptado. (Confirma por webhook antes de enviar producto)");
+        alert("Pago completado", "El pago fue aceptado. (Confirma por webhook antes de enviar producto)");
     }
     
 }
