@@ -3,7 +3,7 @@ import { View, Text, Button, ScrollView, RefreshControl } from "react-native";
 import { AuthContext, UserInfo, UserList } from "../components";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
-export default function UserHomeScreen() {
+export default function UserHomeScreen( {navigation} ) {
   const { logout, logoutAll, loggedUser, onRefresh, refreshing, users } = useContext(AuthContext);
 
   useEffect(() => {
@@ -33,7 +33,7 @@ export default function UserHomeScreen() {
           )}
 
           {users ? <UserList users={users} /> : <Text>Cargando lista...</Text>}
-
+          <Button title="Checkout" onPress={() => navigation.navigate('Checkout')} />
           <ScrollView
             horizontal={true}
             scrollEnabled={false}
